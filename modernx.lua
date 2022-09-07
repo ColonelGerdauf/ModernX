@@ -113,6 +113,36 @@ local language = {
 		nolist = '无列表信息',
 		chapter = '章节',
 		nochapter = '无章节信息',
+	},
+	['cht'] = {
+		welcome = '{\\1c&H00\\bord0\\fs30\\fn微软雅黑 light\\fscx125}MPV{\\fscx100} 播放器',  -- this text appears when mpv starts
+		off = '關閉',
+		na = 'n/a',
+		none = '無',
+		video = '視頻',
+		audio = '音頻',
+		subtitle = '字幕',
+		available = '可選',
+		track = '：',
+		playlist = '播放列表',
+		nolist = '无列表信息',
+		chapter = '章节',
+		nochapter = '无章节信息',
+	},
+	['pol'] = {
+	    welcome = '{\\fs24\\1c&H0&\\1c&HFFFFFF&}Upuść plik lub łącze URL do odtworzenia.',  -- this text appears when mpv starts
+		off = 'WYŁ.',
+		na = 'n/a',
+		none = 'nic',
+		video = 'Wideo',
+		audio = 'Ścieżka audio',
+		subtitle = 'Napisy',
+		available = 'Dostępne ',
+		track = ' Ścieżki:',
+		playlist = 'Lista odtwarzania',
+		nolist = 'Lista odtwarzania pusta.',
+		chapter = 'Rozdział',
+		nochapter = 'Brak rozdziałów.',
 	}	
 }
 -- read options from config and command-line
