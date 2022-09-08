@@ -82,6 +82,39 @@ local icons = {
   info = '',
 }
 
+-- Stock language settings
+local language_default = {
+	welcome = '{\\fs24\\1c&H0&\\1c&HFFFFFF&}Drop files or URLs to play here.',  -- this text appears when mpv starts
+	off = 'OFF',
+	na = 'n/a',
+	none = 'none',
+	video = 'Video',
+	audio = 'Audio',
+	subtitle = 'Subtitle',
+	available = 'Available ',
+	track = ' Tracks:',
+	playlist = 'Playlist',
+	nolist = 'Empty playlist.',
+	chapter = 'Chapter',
+	nochapter = 'No chapters.',
+}
+
+local language_template = {
+	welcome = '',
+	off = '',
+	na = '',
+	none = '',
+	video = '',
+	audio = '',
+	subtitle = '',
+	available = '',
+	track = '',
+	playlist = '',
+	nolist = '',
+	chapter = '',
+	nochapter = '',
+}
+
 -- Localization
 local language = {
 	['eng'] = {
@@ -177,8 +210,17 @@ local language = {
 }
 -- read options from config and command-line
 opt.read_options(user_opts, 'osc', function(list) update_options(list) end)
+
 -- apply lang opts
-local texts = language[user_opts.language]
+local name = "lang-" + user_opts.language + ".conf"
+local conf = io.open(name,"r")
+
+if conf == nil then -- EDIT: include file parameter mismatch
+    local texts = language_default
+else
+    local texts = language[user_opts.language]
+end
+
 local osc_param = { -- calculated by osc_init()
     playresy = 0,                           -- canvas size Y
     playresx = 0,                           -- canvas size X
