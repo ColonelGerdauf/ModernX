@@ -99,39 +99,39 @@ local language = {
 		chapter = 'Chapter',
 		nochapter = 'No chapters.',
 	},
-	['chs'] = {
-		welcome = '{\\1c&H00\\bord0\\fs30\\fn微软雅黑 light\\fscx125}MPV{\\fscx100} 播放器',  -- this text appears when mpv starts
-		off = '关闭',
+	['fra'] = {
+	    welcome = '{\\fs24\\1c&H0&\\1c&HFFFFFF&}Déposez ici des fichiers ou des URL pour les lire.',  -- this text appears when mpv starts
+		off = 'ARRÊT',
 		na = 'n/a',
-		none = '无',
-		video = '视频',
-		audio = '音频',
-		subtitle = '字幕',
-		available = '可选',
-		track = '：',
-		playlist = '播放列表',
-		nolist = '无列表信息',
-		chapter = '章节',
-		nochapter = '无章节信息',
+		none = 'rien',
+		video = 'Vidéo',
+		audio = 'L\'audio',
+		subtitle = 'Sous-titre',
+		available = 'Disponible ',
+		track = ' Des pistes:',
+		playlist = 'Playlist',
+		nolist = 'Playlist vide.',
+		chapter = 'Chapitre',
+		nochapter = 'Pas de chapitres.',
 	},
-	['cht'] = {
-		welcome = '{\\1c&H00\\bord0\\fs30\\fn微软雅黑 light\\fscx125}MPV{\\fscx100} 播放器',  -- this text appears when mpv starts
-		off = '關閉',
+	['spa'] = {
+	    welcome = '{\\fs24\\1c&H0&\\1c&HFFFFFF&}Suelte archivos o URL para jugar aquí.',  -- this text appears when mpv starts
+		off = 'APAGADO',
 		na = 'n/a',
-		none = '無',
-		video = '視頻',
-		audio = '音頻',
-		subtitle = '字幕',
-		available = '可選',
-		track = '：',
-		playlist = '播放列表',
-		nolist = '无列表信息',
-		chapter = '章节',
-		nochapter = '无章节信息',
+		none = 'nada',
+		video = 'Vídeo',
+		audio = 'Audio',
+		subtitle = 'Subtitular',
+		available = 'Disponible ',
+		track = ' Pistas:',
+		playlist = 'Playlist',
+		nolist = 'Playlist vacía.',
+		chapter = 'Capítulo',
+		nochapter = 'Sin capítulos.',
 	},
 	['pol'] = {
 	    welcome = '{\\fs24\\1c&H0&\\1c&HFFFFFF&}Upuść plik lub łącze URL do odtworzenia.',  -- this text appears when mpv starts
-		off = 'WYŁ.',
+		off = 'WYŁ',
 		na = 'n/a',
 		none = 'nic',
 		video = 'Wideo',
@@ -143,7 +143,37 @@ local language = {
 		nolist = 'Lista odtwarzania pusta.',
 		chapter = 'Rozdział',
 		nochapter = 'Brak rozdziałów.',
-	}	
+	},
+	['chs'] = {
+		welcome = '{\\1c&H00\\bord0\\fs30\\fn微软雅黑 light\\fscx125}MPV{\\fscx100} 播放器',  -- this text appears when mpv starts
+		off = '关闭',
+		na = 'n/a',
+		none = '无',
+		video = '视频',
+		audio = '音频',
+		subtitle = '字幕',
+		available = '可选',
+		track = '轨道：',
+		playlist = '播放列表',
+		nolist = '无列表信息',
+		chapter = '章节',
+		nochapter = '无章节信息',
+	},
+	['cht'] = {
+		welcome = '{\\1c&H00\\bord0\\fs30\\fn微軟雅黑 light\\fscx125}MPV{\\fscx100} 播放器',  -- this text appears when mpv starts
+		off = '關閉',
+		na = 'n/a',
+		none = '無',
+		video = '視頻',
+		audio = '音頻',
+		subtitle = '字幕',
+		available = '可選',
+		track = '軌道：',
+		playlist = '播放列表',
+		nolist = '無列表信息',
+		chapter = '章節',
+		nochapter = '無章節信息',
+	}
 }
 -- read options from config and command-line
 opt.read_options(user_opts, 'osc', function(list) update_options(list) end)
