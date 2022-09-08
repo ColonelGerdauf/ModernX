@@ -212,7 +212,7 @@ local language = {
 opt.read_options(user_opts, 'osc', function(list) update_options(list) end)
 
 -- apply lang opts
-local name = "lang-" + user_opts.language + ".conf"
+local name = user_opts.language + ".conf"
 local conf = io.open(name,"r")
 
 if conf == nil then -- EDIT: include file parameter mismatch
