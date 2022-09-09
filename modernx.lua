@@ -35,9 +35,9 @@ local user_opts = {
     iamaprogrammer = false,      -- use native mpv values and disable OSC
     --                              internal track list management (and some
     --                              functions that depend on it)
-    font = 'mpv-osd-symbols',	 -- default osc font
-    seekbarhandlesize = 1.0,	 -- size ratio of the slider handle, range 0 ~ 1
-    seekrange = true,		 -- show seekrange overlay
+    font = 'mpv-osd-symbols',    -- default osc font
+    seekbarhandlesize = 1.0,     -- size ratio of the slider handle, range 0 ~ 1
+    seekrange = true,            -- show seekrange overlay
     seekrangealpha = 64,      	 -- transparency of seekranges
     seekbarkeyframes = true,     -- use keyframes when dragging the seekbar
     showjump = true,             -- show "jump forward/backward 5 seconds" buttons 
@@ -49,13 +49,13 @@ local user_opts = {
     --                              'exact', 'relative+keyframes', etc.
     title = '${media-title}',    -- string compatible with property-expansion
     --                              to be shown as OSC title
-    showtitle = true,		 -- show title in OSC
+    showtitle = true,            -- show title in OSC
     showonpause = true,          -- whether to disable the hide timeout on pause
     timetotal = true,          	 -- display total time instead of remaining time?
     timems = false,              -- Display time down to millliseconds by default
     visibility = 'auto',         -- only used at init to set visibility_mode(...)
     windowcontrols = 'auto',     -- whether to show window controls
-    language = 'eng',		 -- eng=English, chs=Chinese
+    language = 'eng',            -- eng=English, chs=Chinese
     keyboardnavigation = false,  -- enable directional keyboard navigation
     chapter_fmt = "Chapter: %s", -- chapter print format for seekbar-hover. "no" to disable
 }
