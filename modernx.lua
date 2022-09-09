@@ -99,22 +99,6 @@ local language_default = {
 	nochapter = 'No chapters.',
 }
 
-local language_template = {
-	welcome = '',
-	off = '',
-	na = '',
-	none = '',
-	video = '',
-	audio = '',
-	subtitle = '',
-	available = '',
-	track = '',
-	playlist = '',
-	nolist = '',
-	chapter = '',
-	nochapter = '',
-}
-
 -- Localization
 local language = {
 	['eng'] = {
