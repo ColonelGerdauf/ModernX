@@ -36,7 +36,6 @@ local user_opts = {
     --                              internal track list management (and some
     --                              functions that depend on it)
     font = 'mpv-osd-symbols',    -- default osc font
-    seekbarhandlesize = 1.0,     -- size ratio of the slider handle, range 0 ~ 1
     seekrange = true,            -- show seekrange overlay
     seekrangealpha = 64,      	 -- transparency of seekranges
     seekbarkeyframes = true,     -- use keyframes when dragging the seekbar
@@ -52,9 +51,10 @@ local user_opts = {
     showtitle = true,            -- show title in OSC
     showonpause = true,          -- whether to disable the hide timeout on pause
     timetotal = true,          	 -- display total time instead of remaining time?
-    timems = false,              -- Display time down to millliseconds by default
+    timems = false,              -- display time down to millliseconds by default
     visibility = 'auto',         -- only used at init to set visibility_mode(...)
     windowcontrols = 'auto',     -- whether to show window controls
+    processvolume = true,        -- volue slider show processd volume
     language = 'eng',            -- eng=English, chs=Chinese
     keyboardnavigation = false,  -- enable directional keyboard navigation
     chapter_fmt = "Chapter: %s", -- chapter print format for seekbar-hover. "no" to disable
@@ -262,7 +262,9 @@ local state = {
     maximized = false,
     osd = mp.create_osd_overlay('ass-events'),
     mute = false,
-    lastvisibility = user_opts.visibility,	-- save last visibility on pause if showonpause
+    lastvisibility = user_opts.visibility,		-- save last visibility on pause if showtitle
+    sys_volume,									--system volume
+    proc_volume,								--processed volume
     fulltime = user_opts.timems,
     highlight_element = 'cy_audio',
     chapter_list = {},                          -- sorted by time
@@ -509,6 +511,14 @@ function ass_draw_rr_h_ccw(ass, x0, y0, x1, y1, r1, hexagon, r2)
     end
 end
 
+-- set volume
+function set_volume(val)
+    if user_opts.processvolume then
+        val = 10*math.sqrt(val)
+    end
+    mp.commandv('set', 'volume', val)
+    mp.commandv('add', 'volume', 0)	--this prevent volume exceeds limit
+end
 
 --
 -- Tracklist Management
@@ -660,15 +670,15 @@ function prepare_elements()
             -- draw static slider parts
             local slider_lo = element.layout.slider
             -- calculate positions of min and max points
-			element.slider.min.ele_pos = user_opts.seekbarhandlesize * elem_geo.h / 2
-			element.slider.max.ele_pos = elem_geo.w - element.slider.min.ele_pos
+            element.slider.min.ele_pos = elem_geo.h / 2
+            element.slider.max.ele_pos = elem_geo.w - element.slider.min.ele_pos
             element.slider.min.glob_pos = element.hitbox.x1 + element.slider.min.ele_pos
             element.slider.max.glob_pos = element.hitbox.x1 + element.slider.max.ele_pos
 
             static_ass:draw_start()
-			-- a hack which prepares the whole slider area to allow center placements such like an=5
-			static_ass:rect_cw(0, 0, elem_geo.w, elem_geo.h)
-			static_ass:rect_ccw(0, 0, elem_geo.w, elem_geo.h)
+            -- a hack which prepares the whole slider area to allow center placements such like an=5
+            static_ass:rect_cw(0, 0, elem_geo.w, elem_geo.h)
+            static_ass:rect_ccw(0, 0, elem_geo.w, elem_geo.h)
             -- marker nibbles
             if not (element.slider.markerF == nil) and (slider_lo.gap > 0) then
                 local markers = element.slider.markerF()
@@ -795,8 +805,8 @@ function render_elements(master_ass)
             local s_max = element.slider.max.value
             -- draw pos marker
             local pos = element.slider.posF()
-            local seekRanges = element.slider.seekRangesF()
-			local rh = user_opts.seekbarhandlesize * elem_geo.h / 2 -- Handle radius
+            local seekRanges
+            local rh = elem_geo.h / 2 -- Handle radius
             local xp
             
             if pos then
@@ -804,7 +814,7 @@ function render_elements(master_ass)
 				ass_draw_cir_cw(elem_ass, xp, elem_geo.h/2, rh)
 				elem_ass:rect_cw(0, slider_lo.gap, xp, elem_geo.h - slider_lo.gap)
             end
-
+            if element.slider.seekRangesF ~= nil then seekRanges = element.slider.seekRangesF() end
             if seekRanges then
 				elem_ass:draw_stop()
 				elem_ass:merge(element.style_ass)
@@ -1204,7 +1214,8 @@ layouts = function ()
     add_area('input', get_hitbox_coords(posX, posY, 1, osc_geo.w, 104))
 
     -- area for show/hide
-    add_area('showhide', 0, 0, osc_param.playresx, osc_param.playresy)
+    add_area('showhide', 0, osc_param.playresy-200, osc_param.playresx, osc_param.playresy)
+    add_area('showhide_wc', osc_param.playresx*0.67, 0, osc_param.playresx, 48)
 
     -- fetch values
     local osc_w, osc_h=
@@ -1660,9 +1671,24 @@ function osc_init()
     ne.slider.posF =
         function () return mp.get_property_number('percent-pos', nil) end
     ne.slider.tooltipF = function (pos)
-        local duration = mp.get_property_number('duration', nil)
-        if not ((duration == nil) or (pos == nil)) then
-            possec = duration * (pos / 100)
+        local duration = mp.get_property_number('duration', nil) if not ((duration == nil) or (pos == nil)) then
+        local possec = duration * (pos / 100)
+            local chapters = mp.get_property_native('chapter-list', {})
+            if #chapters > 0 then
+                local ch = #chapters
+                local i
+                for i = 1, #chapters do
+                    if chapters[i].time / duration * 100 >= pos then
+                        ch = i - 1
+                        break
+                    end
+                end
+                if ch == 0 then
+                    return string.format('[%s] [0/%d]', mp.format_time(possec), #chapters)
+                elseif chapters[ch].title then 
+                    return string.format('[%s] [%d/%d][%s]', mp.format_time(possec), ch, #chapters, chapters[ch].title)
+                end
+            end
             return mp.format_time(possec)
         else
             return ''
@@ -1744,37 +1770,46 @@ function osc_init()
     ne = new_element('volumebar', 'slider')
     ne.visible = (osc_param.playresx >= 700) and user_opts.volumecontrol
     ne.enabled = (get_track('audio')>0)
-    ne.slider.markerF = function ()if mp.get_property('pause') == 'no' then
-        return {}
-    end
-    ne.slider.seekRangesF = function()
-      return nil
-    end
+    ne.slider.tooltipF = 
+        function (pos)
+            local refpos = state.proc_volume
+            if refpos > 100 then refpos = 100 end
+            if pos+3 >= refpos and pos-3 <= refpos then
+                return string.format('%d', state.proc_volume)
+            else
+                return ''
+            end
+        end
+    ne.slider.markerF = nil
+    ne.slider.seekRangesF = nil
     ne.slider.posF =
         function ()
-            local val = mp.get_property_number('volume', nil)
-            return val*val/100
+            return state.proc_volume
         end
     ne.eventresponder['mouse_move'] =
         function (element)
-            if not element.state.mbtnleft then return end -- allow drag for mbtnleft only!
+            if not element.state.mbtnleft then return end
             local seekto = get_slider_value(element)
             if (element.state.lastseek == nil) or
                 (not (element.state.lastseek == seekto)) then
-                    mp.commandv('set', 'volume', 10*math.sqrt(seekto))
+                    set_volume(seekto)
                     element.state.lastseek = seekto
             end
         end
     ne.eventresponder['mbtn_left_down'] = --exact seeks on single clicks
         function (element)
             local seekto = get_slider_value(element)
-            mp.commandv('set', 'volume', 10*math.sqrt(seekto))
+            set_volume(seekto)
             element.state.mbtnleft = true
         end
     ne.eventresponder['mbtn_left_up'] =
         function (element) element.state.mbtnleft = false end
     ne.eventresponder['reset'] =
         function (element) element.state.lastseek = nil end
+    ne.eventresponder['wheel_up_press'] =
+        function (element) set_volume(state.proc_volume+5) end
+    ne.eventresponder['wheel_down_press'] =
+        function (element) set_volume(state.proc_volume-5) end
 
     -- tc_left (current pos)
     ne = new_element('tc_left', 'button')
@@ -1882,14 +1917,14 @@ function pause_state(name, enabled)
     state.paused = enabled
     mp.add_timeout(0.1, function() state.osd:update() end) 
     if user_opts.showonpause then
-		if enabled then
-			state.lastvisibility = user_opts.visibility
-			visibility_mode("always", true)
-			show_osc()
-		else
-			visibility_mode(state.lastvisibility, true)
-		end
-	end
+        if enabled then
+            state.lastvisibility = user_opts.visibility
+            visibility_mode('always', true)
+            show_osc()
+        else
+            visibility_mode(state.lastvisibility, true)
+        end
+    end
     request_tick()
 end
 
@@ -2364,6 +2399,16 @@ mp.observe_property('mute', 'bool',
         state.mute = val
     end
 )
+mp.observe_property('volume', 'number',
+    function(name, val)
+        state.sys_volume = val
+        if user_opts.processvolume then
+            state.proc_volume = val*val/100
+        else
+            state.proc_volume = val
+        end
+    end
+)
 mp.observe_property('border', 'bool',
     function(name, val)
         state.border = val
@@ -2471,7 +2516,7 @@ function visibility_mode(mode, no_osd)
     elseif mode == 'never' then
         enable_osc(false)
     else
-        msg.warn('Ignoring unknown visibility mode \"' .. mode .. '\"')
+        msg.warn('Ignoring unknown visibility mode \'' .. mode .. '\'')
         return
     end
 
